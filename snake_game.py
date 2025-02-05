@@ -1,10 +1,10 @@
 import pygame
 import random
 
-
+# Inicjalizacja Pygame
 pygame.init()
 
-
+# Kolory
 white = (255, 255, 255)
 yellow = (255, 255, 102)
 black = (0, 0, 0)
@@ -12,12 +12,12 @@ red = (213, 50, 80)
 green = (0, 255, 0)
 blue = (50, 153, 213)
 
-
+# Wymiary okna
 width = 600
 height = 400
 
 gameDisplay = pygame.display.set_mode((width, height))
-pygame.display.set_caption('Snake')
+pygame.display.set_caption('Snake with Wraparound')
 
 clock = pygame.time.Clock()
 
@@ -35,8 +35,13 @@ def your_score(score):
     value = score_font.render("Your Score: " + str(score), True, black)
     gameDisplay.blit(value, [0, 0])
 
+def message(msg, color):
+    mesg = font_style.render(msg, True, color)
+    gameDisplay.blit(mesg, [width / 6, height / 3])
+
 def gameLoop():
     game_over = False
+    game_close = False
 
     x1 = width / 2
     y1 = height / 2
@@ -52,6 +57,21 @@ def gameLoop():
     foody = round(random.randrange(0, height - snake_block) / 10.0) * 10.0
 
     while not game_over:
+        while game_close:
+            gameDisplay.fill(blue)
+            message("Game Over! Press C to Play Again or Q to Quit", red)
+            pygame.display.update()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    game_over = True
+                    game_close = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_over = True
+                        game_close = False
+                    if event.key == pygame.K_c:
+                        gameLoop()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
@@ -73,6 +93,7 @@ def gameLoop():
                     x1_change = 0
                     last_direction = "DOWN"
 
+        # Teleportacja węża na przeciwną stronę ekranu
         x1 = (x1 + x1_change) % width
         y1 = (y1 + y1_change) % height
 
@@ -85,7 +106,7 @@ def gameLoop():
 
         for x in snake_List[:-1]:
             if x == snake_Head:
-                game_over = True
+                game_close = True
 
         our_snake(snake_block, snake_List)
         your_score(Length_of_snake - 1)
